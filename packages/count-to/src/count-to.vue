@@ -8,6 +8,20 @@
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, SetupContext, watch } from 'vue'
 import { requestAnimationFrame, cancelAnimationFrame } from './requestAnimationFrame'
 
+declare interface ICountToProps {
+  startVal?: number
+  endVal?: number
+  duration?: number
+  autoplay?: boolean
+  decimal?: string
+  decimals?: number
+  separator?: string
+  prefix?: string
+  suffix?: string
+  useEasing?: boolean
+  easingFn?: (t, b, c, d) => any
+}
+
 export default defineComponent({
   name: 'CountTo',
   emits: ['mountedCallback', 'callback'],
