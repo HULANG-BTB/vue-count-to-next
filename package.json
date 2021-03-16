@@ -11,8 +11,8 @@
   "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lib": "vue-cli-service build --target lib --name vue-count-next --dest dist packages/index.ts",
+    "build": "vue-cli-service build --target lib --name vue-count-next --dest lib packages/index.ts",
+    "types": "tsc -d --emitDeclarationOnly --target esnext --removeComments false --allowJs false --declarationDir ./lib ./packages",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
