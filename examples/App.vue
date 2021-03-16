@@ -97,15 +97,6 @@ export default defineComponent({
       setPrefix: '¥ '
     })
 
-    // ,
-    //     ,
-    //     callback() {
-    //       console.log('callback')
-    //     },
-    //     pauseResume() {
-    //       this.$refs.example3.pauseResume();
-    //     }
-
     return {
       code1,
       ref1,
