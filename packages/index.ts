@@ -1,16 +1,17 @@
 import CountTo from './count-to'
 
-import { Plugin, App } from 'vue'
+import { App } from 'vue'
 
 const components = [CountTo]
 
-const packages: Plugin = {
-  install: (app: App) => {
-    components.forEach((component: Plugin) => {
-      app.use(component)
-    })
-  },
-  ...components
+const install = (app: App) => {
+  components.forEach((component) => {
+    app.component(component.name, component)
+  })
 }
 
-export default packages
+export default {
+  install
+}
+
+export { CountTo }
