@@ -8,7 +8,7 @@
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, SetupContext, watch } from 'vue'
 import { requestAnimationFrame, cancelAnimationFrame } from './requestAnimationFrame'
 
-declare interface ICountToProps {
+export interface ICountToProps {
   startVal?: number
   endVal?: number
   duration?: number

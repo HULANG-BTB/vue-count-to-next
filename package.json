@@ -3,7 +3,8 @@
   "version": "0.1.1",
   "description": "It's a vue3 component that will count to a target number at a specified duration",
   "author": "AloneH <admin@oibit.cn>",
-  "main": "dist/vue-count-next.umd.min.js",
+  "main": "lib/index.umd.js",
+  "module": "lib/index.esm.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/HULANG-BTB/vue-count-to-next"
@@ -11,12 +12,20 @@
   "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --name vue-count-next --dest lib packages/index.ts",
-    "types": "tsc -d --emitDeclarationOnly --target esnext --removeComments false --allowJs false --declarationDir ./lib ./packages",
+    "build": "yarn build:umd && yarn build:esm",
+    "build:umd": "rollup --config ./build/rollup.config.umd.js",
+    "build:esm": "rollup --config ./build/rollup.config.esm.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
+  "dependencies": {
+    "vue": "3.0.7"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.7"
+  },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.2.0",
     "@types/jest": "^24.0.19",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
@@ -30,13 +39,15 @@
     "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^2.0.0-0",
     "core-js": "^3.6.5",
-    "vue": "^3.0.0",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-vue": "^7.0.0-0",
     "lint-staged": "^9.5.0",
     "node-sass": "^4.12.0",
     "prettier": "^1.19.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup-plugin-vue": "^6.0.0",
     "sass-loader": "^8.0.2",
     "typescript": "~3.9.3",
     "vue-jest": "^5.0.0-0"
