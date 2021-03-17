@@ -5,6 +5,7 @@
   "author": "AloneH <admin@oibit.cn>",
   "main": "lib/index.umd.js",
   "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/HULANG-BTB/vue-count-to-next"
