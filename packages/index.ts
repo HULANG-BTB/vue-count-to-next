@@ -4,13 +4,10 @@ import { App } from 'vue'
 
 const components = [CountTo]
 
-const install: any = function(app: App) {
-  if (!install.installed) {
-    components.forEach((component) => {
-      app.component(component.name, component)
-    })
-    install.installed = true
-  }
+const install = function(app: App) {
+  components.forEach((component) => {
+    app.component(component.name, component)
+  })
 }
 
 export default {
