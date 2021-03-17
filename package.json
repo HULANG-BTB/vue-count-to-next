@@ -1,6 +1,6 @@
 {
   "name": "vue-count-to-next",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "It's a vue3 component that will count to a target number at a specified duration",
   "author": "AloneH <admin@oibit.cn>",
   "main": "lib/index.umd.js",
