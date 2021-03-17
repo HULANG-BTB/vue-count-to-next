@@ -1,7 +1,6 @@
 import CountTo from './count-to';
-import { App } from 'vue';
 declare const _default: {
-    install: (app: App<any>) => void;
+    install: any;
 };
 export default _default;
 export { CountTo };

@@ -14,9 +14,6 @@
     "declaration": true,
     "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
-    "types": [
-      "webpack-env"
-    ],
     "paths": {
       "@/*": [
         "examples/*"
