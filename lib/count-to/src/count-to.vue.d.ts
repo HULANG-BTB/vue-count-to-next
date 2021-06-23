@@ -1,15 +1,19 @@
+import { PropType } from 'vue';
+export interface IEasingFunction {
+    (t: number, b: number, c: number, d: number): number;
+}
 export interface ICountToProps {
-    startVal?: number;
-    endVal?: number;
-    duration?: number;
-    autoplay?: boolean;
-    decimal?: string;
-    decimals?: number;
-    separator?: string;
-    prefix?: string;
-    suffix?: string;
-    useEasing?: boolean;
-    easingFn?: (t: any, b: any, c: any, d: any) => any;
+    startVal: number;
+    endVal: number;
+    duration: number;
+    autoplay: boolean;
+    decimal: string;
+    decimals: number;
+    separator: string;
+    prefix: string;
+    suffix: string;
+    useEasing: boolean;
+    easingFn?: IEasingFunction;
 }
 declare const _default: import("vue").DefineComponent<{
     startVal: {
@@ -64,10 +68,12 @@ declare const _default: import("vue").DefineComponent<{
         default: boolean;
     };
     easingFn: {
-        type: FunctionConstructor;
+        type: PropType<IEasingFunction>;
+        required: false;
+        default: undefined;
     };
 }, {
-    countTo: any;
+    displayValue: import("vue").Ref<string>;
     start: () => void;
     pause: () => void;
     resume: () => void;
@@ -84,9 +90,8 @@ declare const _default: import("vue").DefineComponent<{
     prefix: string;
     suffix: string;
     useEasing: boolean;
-} & {
-    easingFn?: Function | undefined;
-}>, {
+    easingFn: IEasingFunction;
+} & {}>, {
     startVal: number;
     endVal: number;
     duration: number;
@@ -97,5 +102,6 @@ declare const _default: import("vue").DefineComponent<{
     prefix: string;
     suffix: string;
     useEasing: boolean;
+    easingFn: IEasingFunction;
 }>;
 export default _default;

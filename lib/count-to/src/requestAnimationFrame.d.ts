@@ -1,3 +1,5 @@
-declare let requestAnimationFrame: any;
-declare let cancelAnimationFrame: any;
-export { requestAnimationFrame, cancelAnimationFrame };
+declare function useRequestAnimationFrame(): {
+    requestAnimationFrame: (callback: FrameRequestCallback) => number;
+    cancelAnimationFrame: (handle: number) => void;
+};
+export { useRequestAnimationFrame };
