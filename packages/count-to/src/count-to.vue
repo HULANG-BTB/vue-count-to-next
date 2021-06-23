@@ -1,25 +1,29 @@
 <template>
   <span>
-    {{ countTo.displayValue }}
+    {{ displayValue }}
   </span>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, SetupContext, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, SetupContext, watch, PropType, ref } from 'vue'
 import { requestAnimationFrame, cancelAnimationFrame } from './requestAnimationFrame'
 
+export interface IEasingFunction {
+  (t: number, b: number, c: number, d: number): number
+}
+
 export interface ICountToProps {
-  startVal?: number
-  endVal?: number
-  duration?: number
-  autoplay?: boolean
-  decimal?: string
-  decimals?: number
-  separator?: string
-  prefix?: string
-  suffix?: string
-  useEasing?: boolean
-  easingFn?: (t, b, c, d) => any
+  startVal: number
+  endVal: number
+  duration: number
+  autoplay: boolean
+  decimal: string
+  decimals: number
+  separator: string
+  prefix: string
+  suffix: string
+  useEasing: boolean
+  easingFn?: IEasingFunction
 }
 
 export default defineComponent({
@@ -80,26 +84,30 @@ export default defineComponent({
       default: true
     },
     easingFn: {
-      type: Function
+      type: Object as PropType<IEasingFunction>,
+      required: false,
+      default: undefined
     }
   },
-  setup(props, context: SetupContext) {
-    const defaultEasingFn = (t, b, c, d) => {
+  setup(props: ICountToProps, context: SetupContext) {
+    // 默认 变化函数
+    const defaultEasingFn = (t, b, c, d): number => {
       return (c * (-Math.pow(2, (-10 * t) / d) + 1) * 1024) / 1023 + b
     }
-
-    const easingFn: Function = props.easingFn || defaultEasingFn // set default func to prop will cause en error
+    const easingFn: IEasingFunction = props.easingFn || defaultEasingFn // set default func to prop will cause en error
 
     const isNumber = (val: string): boolean => {
       return !isNaN(parseFloat(val))
     }
 
+    // 格式化数据 增加前缀、后缀、
     const formatNumber = (num = 0, decimals = 0): string => {
       const numString = num.toFixed(decimals)
       const x = numString.split('.')
-      let x1 = x[0]
-      const x2 = x.length > 1 ? props.decimal + x[1] : ''
+      let x1 = x[0] // 整数部分
+      const x2 = x.length > 1 ? props.decimal + x[1] : '' // 小数部分
       const rgx = /(\d+)(\d{3})/
+      // 添加分隔符 默认 ,
       if (props.separator && !isNumber(props.separator)) {
         while (rgx.test(x1)) {
           x1 = x1.replace(rgx, '$1' + props.separator + '$2')
@@ -108,90 +116,123 @@ export default defineComponent({
       return props.prefix + x1 + x2 + props.suffix
     }
 
-    const countTo = reactive<any>({
-      localStartVal: props.startVal,
-      displayValue: formatNumber(props.startVal),
-      printVal: null,
-      paused: false,
-      localDuration: props.duration,
-      startTime: null,
-      timestamp: null,
-      remaining: null,
-      rAF: null
-    })
+    const displayValue = ref<string>(formatNumber(props.startVal)) // 具体显示的格式化后的字符串
+    let startTime = 0 // 开始时间
+    let remaining = 0 // 剩余时间
+    let localDuration = props.duration || 3000 // 本地持续时间
+    let localStartVal = props.startVal || 0 // 开始数值
+    let printVal = 0 // 显示的数字
+    let paused = false // 是否暂停
+    let requestAnimationFrameHandler: any = null // 动画函数句柄
 
-    const countDown = computed(() => {
+    // 是否为下降式渐变 计算属性 中途可能会改变状态
+    const isCountDown = computed(() => {
       return props.startVal > props.endVal
     })
 
+    // 计算数值
     const count = (timestamp: number) => {
-      if (!countTo.startTime) countTo.startTime = timestamp
-      countTo.timestamp = timestamp
-      const progress = timestamp - countTo.startTime
-      countTo.remaining = countTo.localDuration - progress
+      if (!startTime) startTime = timestamp
+      const progress = timestamp - startTime // 持续时间
+      remaining = localDuration - progress
       if (props.useEasing) {
-        if (countDown.value) {
-          countTo.printVal = countTo.localStartVal - easingFn(progress, 0, countTo.localStartVal - props.endVal, countTo.localDuration)
+        // 使用自定义事件函数
+        if (isCountDown.value) {
+          printVal = localStartVal - easingFn(progress, 0, localStartVal - props.endVal, localDuration)
         } else {
-          countTo.printVal = easingFn(progress, countTo.localStartVal, props.endVal - countTo.localStartVal, countTo.localDuration)
+          printVal = easingFn(progress, localStartVal, props.endVal - localStartVal, localDuration)
         }
       } else {
-        if (countDown.value) {
-          countTo.printVal = countTo.localStartVal - (countTo.localStartVal - props.endVal) * (progress / countTo.localDuration)
+        if (isCountDown.value) {
+          printVal = localStartVal - (localStartVal - props.endVal) * (progress / localDuration)
         } else {
-          countTo.printVal = countTo.localStartVal + (props.endVal - countTo.localStartVal) * (progress / countTo.localDuration)
+          printVal = localStartVal + (props.endVal - localStartVal) * (progress / localDuration)
         }
       }
-      if (countDown.value) {
-        countTo.printVal = countTo.printVal < props.endVal ? props.endVal : countTo.printVal
+      if (isCountDown.value) {
+        printVal = printVal < props.endVal ? props.endVal : printVal
       } else {
-        countTo.printVal = countTo.printVal > props.endVal ? props.endVal : countTo.printVal
+        printVal = printVal > props.endVal ? props.endVal : printVal
       }
-      countTo.displayValue = formatNumber(countTo.printVal)
-      if (progress < countTo.localDuration) {
-        countTo.rAF = requestAnimationFrame(count)
+      displayValue.value = formatNumber(printVal)
+      if (progress < localDuration) {
+        requestAnimationFrameHandler = requestAnimationFrame(count)
       } else {
         context.emit('callback')
       }
     }
 
+    // // 计算数值
+    // const count = (timestamp: number) => {
+    //   if (!startTime) startTime = timestamp
+    //   countTo.timestamp = timestamp
+    //   const progress = timestamp - startTime
+    //   countTo.remaining = localDuration - progress
+    //   if (props.useEasing) {
+    //     if (isCountDown.value) {
+    //       printVal = localStartVal - easingFn(progress, 0, localStartVal - props.endVal, localDuration)
+    //     } else {
+    //       printVal = easingFn(progress, localStartVal, props.endVal - localStartVal, localDuration)
+    //     }
+    //   } else {
+    //     if (isCountDown.value) {
+    //       printVal = localStartVal - (localStartVal - props.endVal) * (progress / localDuration)
+    //     } else {
+    //       printVal = localStartVal + (props.endVal - localStartVal) * (progress / localDuration)
+    //     }
+    //   }
+    //   if (isCountDown.value) {
+    //     printVal = printVal < props.endVal ? props.endVal : printVal
+    //   } else {
+    //     printVal = printVal > props.endVal ? props.endVal : printVal
+    //   }
+    //   countTo.displayValue = formatNumber(printVal)
+    //   if (progress < localDuration) {
+    //     requestAnimationFrameHandler = requestAnimationFrame(count)
+    //   } else {
+    //     context.emit('callback')
+    //   }
+    // }
+
     const start = () => {
-      countTo.localStartVal = props.startVal
-      countTo.startTime = null
-      countTo.localDuration = props.duration
-      countTo.paused = false
-      countTo.rAF = requestAnimationFrame(count)
+      localStartVal = props.startVal
+      startTime = 0
+      localDuration = props.duration
+      paused = false
+      requestAnimationFrameHandler = requestAnimationFrame(count)
     }
 
     const pause = () => {
-      cancelAnimationFrame(countTo.rAF)
+      console.log('pause')
+      cancelAnimationFrame(requestAnimationFrameHandler)
     }
 
     const resume = () => {
-      countTo.startTime = null
-      countTo.localDuration = +countTo.remaining
-      countTo.localStartVal = +countTo.printVal
+      console.log('resume')
+      startTime = 0
+      localDuration = +remaining
+      localStartVal = +printVal
       requestAnimationFrame(count)
     }
 
     const reset = () => {
-      countTo.startTime = null
-      cancelAnimationFrame(countTo.rAF)
-      countTo.displayValue = formatNumber(props.startVal)
+      startTime = 0
+      cancelAnimationFrame(requestAnimationFrameHandler)
+      displayValue.value = formatNumber(props.startVal)
     }
 
     const pauseResume = () => {
-      if (countTo.paused) {
+      if (paused) {
         resume()
-        countTo.paused = false
+        paused = false
       } else {
         pause()
-        countTo.paused = true
+        paused = true
       }
     }
 
     onBeforeUnmount(() => {
-      cancelAnimationFrame(countTo.rAF)
+      cancelAnimationFrame(requestAnimationFrameHandler)
     })
 
     onMounted(() => {
@@ -213,7 +254,7 @@ export default defineComponent({
     )
 
     return {
-      countTo,
+      displayValue,
       start,
       pause,
       resume,
@@ -223,5 +264,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss"></style>
