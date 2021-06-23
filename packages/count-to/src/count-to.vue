@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, onMounted, SetupContext, watch, PropType, ref } from 'vue'
-import { requestAnimationFrame, cancelAnimationFrame } from './requestAnimationFrame'
+import { useRequestAnimationFrame } from './requestAnimationFrame'
 
 export interface IEasingFunction {
   (t: number, b: number, c: number, d: number): number
@@ -123,7 +123,9 @@ export default defineComponent({
     let localStartVal = props.startVal || 0 // 开始数值
     let printVal = 0 // 显示的数字
     let paused = false // 是否暂停
-    let requestAnimationFrameHandler: any = null // 动画函数句柄
+    let requestAnimationFrameHandler = 0 // 动画函数句柄
+
+    const { requestAnimationFrame, cancelAnimationFrame } = useRequestAnimationFrame()
 
     // 是否为下降式渐变 计算属性 中途可能会改变状态
     const isCountDown = computed(() => {
@@ -162,38 +164,6 @@ export default defineComponent({
       }
     }
 
-    // // 计算数值
-    // const count = (timestamp: number) => {
-    //   if (!startTime) startTime = timestamp
-    //   countTo.timestamp = timestamp
-    //   const progress = timestamp - startTime
-    //   countTo.remaining = localDuration - progress
-    //   if (props.useEasing) {
-    //     if (isCountDown.value) {
-    //       printVal = localStartVal - easingFn(progress, 0, localStartVal - props.endVal, localDuration)
-    //     } else {
-    //       printVal = easingFn(progress, localStartVal, props.endVal - localStartVal, localDuration)
-    //     }
-    //   } else {
-    //     if (isCountDown.value) {
-    //       printVal = localStartVal - (localStartVal - props.endVal) * (progress / localDuration)
-    //     } else {
-    //       printVal = localStartVal + (props.endVal - localStartVal) * (progress / localDuration)
-    //     }
-    //   }
-    //   if (isCountDown.value) {
-    //     printVal = printVal < props.endVal ? props.endVal : printVal
-    //   } else {
-    //     printVal = printVal > props.endVal ? props.endVal : printVal
-    //   }
-    //   countTo.displayValue = formatNumber(printVal)
-    //   if (progress < localDuration) {
-    //     requestAnimationFrameHandler = requestAnimationFrame(count)
-    //   } else {
-    //     context.emit('callback')
-    //   }
-    // }
-
     const start = () => {
       localStartVal = props.startVal
       startTime = 0
@@ -203,12 +173,10 @@ export default defineComponent({
     }
 
     const pause = () => {
-      console.log('pause')
       cancelAnimationFrame(requestAnimationFrameHandler)
     }
 
     const resume = () => {
-      console.log('resume')
       startTime = 0
       localDuration = +remaining
       localStartVal = +printVal
