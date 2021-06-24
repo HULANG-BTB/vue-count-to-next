@@ -8,5 +8,7 @@ module.exports = {
       // 输出文件名
       filename: 'index.html'
     }
-  }
+  },
+  // github 部署 需要前缀
+  publicPath: '.'
 }
