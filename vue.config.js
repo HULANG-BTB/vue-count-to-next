@@ -9,5 +9,6 @@ module.exports = {
       filename: 'index.html'
     }
   },
-  outputDir: 'docs'
+  // github 部署 需要前缀
+  publicPath: 'vue-count-to-next'
 }
