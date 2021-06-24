@@ -9,7 +9,6 @@ script:
   - npm run build
   - npm run build:web
 deploy:
-  strategy: git
   provider: pages
   cleanup: false
   local_dir: ./dist/
