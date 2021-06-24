@@ -14,7 +14,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build:web": "vue-cli-service build",
-    "build": "yarn build:umd && yarn build:esm",
+    "build": "npm run build:umd && npm run build:esm",
     "build:umd": "rollup --config ./build/rollup.config.umd.js",
     "build:esm": "rollup --config ./build/rollup.config.esm.js",
     "lint": "vue-cli-service lint"
